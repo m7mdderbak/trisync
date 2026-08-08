@@ -1,4 +1,6 @@
-// --- 1. التحقق من الرمز السري ---
+let currentChatUser = "";
+
+// 1. شاشة الدخول السرية (PIN: 2006)
 function loginWithPin() {
   const pinInput = document.getElementById('pin-input').value;
   if (pinInput === '2006') {
@@ -11,15 +13,16 @@ function loginWithPin() {
   }
 }
 
-// --- 2. التحكم بالتنقل بين الصفحات (Tabs) ---
+// 2. التنقل بين التبويبات
 function switchTab(tabName) {
-  const tabs = document.querySelectorAll('.tab-content');
-  tabs.forEach(tab => tab.classList.add('hidden'));
+  document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+  document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active', 'text-cyan-400'));
   
   document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+  event.currentTarget.classList.add('active', 'text-cyan-400');
 }
 
-// --- 3. بناء الكرة الأرضية ثلاثية الأبعاد (Three.js 3D Globe) ---
+// 3. بناء الكرة الأرضية 3D
 let scene, camera, renderer, globe;
 
 function initGlobe() {
@@ -31,59 +34,72 @@ function initGlobe() {
   
   renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
   renderer.setSize(container.clientWidth, container.clientHeight);
-  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   container.appendChild(renderer.domElement);
 
-  // مجسم الكرة الأرضية
-  const geometry = new THREE.SphereGeometry(2, 36, 36);
+  const geometry = new THREE.SphereGeometry(2, 32, 32);
   const material = new THREE.MeshBasicMaterial({
     color: 0x38bdf8,
     wireframe: true,
     transparent: true,
-    opacity: 0.45
+    opacity: 0.4
   });
   
   globe = new THREE.Mesh(geometry, material);
   scene.add(globe);
 
-  camera.position.z = 5.5;
+  camera.position.z = 5.2;
 
-  // دوران خفيف ومستمر للكرة الأرضية
   function animate() {
     requestAnimationFrame(animate);
-    globe.rotation.y += 0.0025;
+    globe.rotation.y += 0.003;
     renderer.render(scene, camera);
   }
   animate();
 }
 
-// --- 4. وضع البحار الخاص بمحمد (تغيير الموقع فوراً) ---
+// 4. وضع البحار لمحمد
 function openSailorModal() {
-  const newLocation = prompt("⚓ وضع البحار: أدخل موقعك الحالي أو اسم السفينة/الميناء:");
+  const newLocation = prompt("⚓ وضع البحار: أدخل موقعك الحالي أو اسم البحر/الميناء:");
   if (newLocation && newLocation.trim() !== "") {
     document.getElementById('card-loc-mohamed').innerText = newLocation;
-    alert(`تم تحديث موقعك الملاحي إلى: ${newLocation}`);
   }
 }
 
-// --- 5. ميزة تعديل الأسماء الشخصية ---
-function editProfile(currentName) {
-  const newName = prompt(`تعديل الاسم الحالي (${currentName}):`);
-  if (newName && newName.trim() !== "") {
-    if (currentName === 'محمد') document.getElementById('card-name-mohamed').innerText = newName;
-    if (currentName === 'مصطفى') document.getElementById('card-name-mustafa').innerText = newName;
-    if (currentName === 'شهد') document.getElementById('card-name-shahad').innerText = newName;
+// 5. فتح وإغلاق الشات المباشر
+function openDirectChat(name, icon) {
+  currentChatUser = name;
+  document.getElementById('chat-user-name').innerText = name;
+  document.getElementById('chat-user-icon').innerText = icon;
+  document.getElementById('direct-chat-modal').classList.remove('hidden');
+  document.getElementById('direct-chat-modal').classList.add('flex');
+}
+
+function closeDirectChat() {
+  document.getElementById('direct-chat-modal').classList.add('hidden');
+  document.getElementById('direct-chat-modal').classList.remove('flex');
+}
+
+function sendDirectMessage() {
+  const input = document.getElementById('direct-chat-input');
+  const messagesBox = document.getElementById('direct-chat-messages');
+  if (input.value.trim() !== "") {
+    const msg = document.createElement('div');
+    msg.className = "bg-cyan-600/30 border border-cyan-500/30 p-2.5 rounded-2xl max-w-[80%] self-end text-cyan-100 mr-auto text-left";
+    msg.innerText = input.value;
+    messagesBox.appendChild(msg);
+    messagesBox.scrollTop = messagesBox.scrollHeight;
+    input.value = "";
   }
 }
 
-// --- 6. الغرفة السرية (The Shadow Room) ---
+// 6. الغرفة السرية
 function sendShadowMessage() {
   const input = document.getElementById('shadow-input');
   const box = document.getElementById('shadow-chat-box');
-  
   if (input.value.trim() !== "") {
     const msgDiv = document.createElement('div');
-    msgDiv.className = "bg-purple-950/60 border border-purple-500/30 p-2 rounded-lg text-purple-200";
+    msgDiv.className = "bg-purple-950/50 border border-purple-500/30 p-2.5 rounded-xl text-purple-200";
     msgDiv.innerHTML = `<span class="font-bold text-purple-400">👤 عضو مجهول:</span> ${input.value}`;
     box.appendChild(msgDiv);
     box.scrollTop = box.scrollHeight;
@@ -91,14 +107,14 @@ function sendShadowMessage() {
   }
 }
 
-// --- 7. مولد أفلام السينما العشوائي ---
+// 7. سينما الأسبوع
 const moviesList = [
   { title: "Inception", genre: "خيال علمي / غموض" },
   { title: "Interstellar", genre: "مغامرة / خيال علمي" },
   { title: "The Dark Knight", genre: "أكشن / دراما" },
   { title: "Gladiator", genre: "ملحمي / أكشن" },
   { title: "Whiplash", genre: "دراما / موسيقى" },
-  { title: "Parasite", genre: "إثارة / دراما" }
+  { title: "The Prestige", genre: "إثارة / غموض" }
 ];
 
 function generateRandomMovie() {
@@ -106,10 +122,4 @@ function generateRandomMovie() {
   document.getElementById('movie-title').innerText = randomMovie.title;
   document.getElementById('movie-genre').innerText = `التصنيف: ${randomMovie.genre}`;
   document.getElementById('movie-card').classList.remove('hidden');
-}
-
-// --- 8. الشات المباشر عند النقر على البطاقات ---
-function openDirectChat(name) {
-  alert(`فتح الشات المباشر والخاص مع: ${name}`);
-}
-  
+                                            }

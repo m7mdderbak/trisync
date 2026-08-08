@@ -12,14 +12,18 @@ function saveUsersToStorage() {
 let loggedUser = "محمد";
 let userPointsCount = 150;
 
-// 1. تسجيل الدخول باستخدام كلمة مرور خاصة لكل حساب
+// 1. تسجيل الدخول باستخدام كلمة مرور خاصة واستخراج اسم المستخدم الصحيح
 function loginWithAccount() {
-  const selectedUser = document.getElementById('user-select').value;
-  const pinInput = document.getElementById('pin-input').value;
+  const selectedUserRaw = document.getElementById('user-select').value;
+  const pinInput = document.getElementById('pin-input').value.trim();
+
+  // استخراج الاسم الأساسي فقط (مثل "محمد" أو "مصطفى" أو "شهد")
+  const selectedUser = selectedUserRaw.split(' ')[0].trim();
 
   const userData = usersData[selectedUser];
 
   if (userData && pinInput === userData.pin) {
+    document.getElementById('pin-error').classList.add('hidden');
     loggedUser = selectedUser;
 
     document.getElementById('current-user-name').innerText = loggedUser;
@@ -129,7 +133,7 @@ function initInteractive3DGlobe() {
   function animate() {
     requestAnimationFrame(animate);
     controls.update();
-    globeGroup.rotation.y += 0.001; // تدوير خفيف تلقائي
+    globeGroup.rotation.y += 0.001;
     updateHTMLMarkers();
     renderer.render(scene, camera);
   }
@@ -152,7 +156,6 @@ function updateHTMLMarkers() {
   markersData.forEach(marker => {
     const worldPos = marker.pos.clone().applyMatrix4(globeGroup.matrixWorld);
     
-    // التأكد إذا كان الكارت في الوجه الأمامي للكرة أم خلفها
     const cameraDistance = camera.position.distanceTo(globeGroup.position);
     const markerDistance = camera.position.distanceTo(worldPos);
 
@@ -166,7 +169,7 @@ function updateHTMLMarkers() {
       marker.element.style.opacity = '1';
       marker.element.style.display = 'block';
     } else {
-      marker.element.style.display = 'none'; // إخفاء الكارت إذا كان خلف الطابة
+      marker.element.style.display = 'none';
     }
   });
 }
@@ -206,7 +209,7 @@ function saveProfileChanges() {
   updateAvatarDisplay('current-user-avatar-container', usersData[loggedUser]);
 
   closeEditProfileModal();
-  location.reload(); // إعادة تحميل خفيفة لتحديث الكروت على الطابة
+  location.reload();
 }
 
 // 5. التحديات والكاميرا
@@ -224,7 +227,7 @@ function previewChallengePhoto(event) {
   }
 }
 
-// 6. قائمة الـ 100 فيلم العالمية Complete 100 Movies
+// 6. قائمة الـ 100 فيلم العالمية
 const moviesList = [
   { title: "The Shawshank Redemption", year: 1994, genre: "دراما", rating: "⭐ 9.3" },
   { title: "The Godfather", year: 1972, genre: "جريمة", rating: "⭐ 9.2" },
@@ -400,5 +403,4 @@ function sendShadowMessage() {
   const input = document.getElementById('shadow-input');
   const box = document.getElementById('shadow-chat-box');
   if (input.value.trim() !== "") {
-    const msgDiv = document.createElement('div');
-    msgDiv.className = "bg-pur
+    const msgDiv = document.createElement

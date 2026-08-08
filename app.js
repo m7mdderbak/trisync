@@ -231,5 +231,5 @@ function generateRandomMovie() {
   document.getElementById('movie-title').innerText = randomMovie.title;
   document.getElementById('movie-genre').innerText = `التصنيف: ${randomMovie.genre}`;
   document.getElementById('movie-card').classList.remove('hidden');
-                            }
-        
+}
+

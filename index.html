@@ -5,12 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>TriSync 🌐</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- مكتبات Three.js والتحكم باللمس للكرة الأرضية -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gray-950 text-white font-sans min-h-screen flex flex-col justify-between select-none">
+<body class="bg-gray-950 text-white font-sans min-h-screen flex flex-col justify-between select-none overflow-x-hidden">
 
   <!-- 🔒 شاشة تسجيل الدخول -->
   <div id="login-screen" class="fixed inset-0 bg-gray-950/95 z-50 flex items-center justify-center p-4 backdrop-blur-2xl">
@@ -25,7 +24,7 @@
         <div>
           <label class="text-[11px] text-gray-300 mb-1 block">اختر حسابك:</label>
           <select id="user-select" class="w-full bg-gray-900 border border-cyan-500/30 rounded-xl p-3 text-xs text-cyan-300 focus:outline-none focus:border-cyan-400">
-            <option value="محمد">محمد (البحار ⚓)</option>
+            <option value="محمد">محمد (طرطوس 🌊)</option>
             <option value="مصطفى">مصطفى (سوريا 🇸🇾)</option>
             <option value="شهد">شهد (السويد 🇸🇪)</option>
           </select>
@@ -33,7 +32,7 @@
 
         <div>
           <label class="text-[11px] text-gray-300 mb-1 block">رمز الـ PIN السرّي:</label>
-          <input type="password" id="pin-input" maxlength="4" placeholder="رمز الـ PIN (2006)" class="w-full text-center text-2xl tracking-widest bg-gray-900 border border-cyan-500/30 rounded-xl p-2.5 focus:outline-none focus:border-cyan-400 text-cyan-300">
+          <input type="password" id="pin-input" maxlength="6" placeholder="أدخل رمز الـ PIN الخاص بك" class="w-full text-center text-lg bg-gray-900 border border-cyan-500/30 rounded-xl p-2.5 focus:outline-none focus:border-cyan-400 text-cyan-300">
         </div>
         
         <p id="pin-error" class="text-red-400 text-xs hidden text-center">الرمز غير صحيح، حاول مجدداً!</p>
@@ -51,7 +50,9 @@
     <!-- الهيدر -->
     <header class="glass-card m-3 p-3.5 rounded-2xl flex justify-between items-center sticky top-3 z-30">
       <div class="flex items-center gap-2.5">
-        <div id="current-user-avatar" class="w-9 h-9 bg-cyan-500/20 border border-cyan-400 rounded-xl flex items-center justify-center text-base">⚓</div>
+        <div id="current-user-avatar-container" class="w-9 h-9 bg-cyan-500/20 border border-cyan-400 rounded-xl flex items-center justify-center text-base overflow-hidden">
+          <span id="current-user-avatar">⚓</span>
+        </div>
         <div>
           <h2 id="current-user-name" class="text-sm font-bold text-cyan-400 leading-tight">محمد</h2>
           <p class="text-[10px] text-emerald-400 flex items-center gap-1">
@@ -62,10 +63,10 @@
 
       <div class="flex gap-2">
         <button onclick="openEditProfileModal()" class="bg-gray-800 text-cyan-300 text-xs px-2.5 py-2 rounded-xl border border-white/10 active:scale-95 transition">
-          ✏️ البروفايل
+          ✏️ البروفايل والأمان
         </button>
         <button onclick="openSailorModal()" class="bg-indigo-600/30 text-indigo-300 text-xs px-2.5 py-2 rounded-xl border border-indigo-500/30 active:scale-95 transition">
-          ⚓ وضع البحار
+          ⚓ البحر
         </button>
       </div>
     </header>
@@ -75,34 +76,16 @@
       
       <!-- TAB 1: الكرة الأرضية والأعضاء -->
       <section id="tab-globe" class="tab-content space-y-4">
-        <div class="glass-card rounded-3xl p-2 overflow-hidden relative border border-cyan-500/20">
-          <div id="globe-container" class="w-full h-80 rounded-2xl overflow-hidden relative cursor-grab active:cursor-grabbing"></div>
+        <div class="glass-card rounded-3xl p-2 overflow-hidden relative border border-cyan-500/20 h-[420px]">
+          <div id="globe-container" class="w-full h-full rounded-2xl overflow-hidden relative cursor-grab active:cursor-grabbing"></div>
           
-          <div class="absolute bottom-3 left-0 right-0 text-center pointer-events-none">
+          <!-- الكروت الطافية فوق الدبابيس -->
+          <div id="html-markers-container" class="absolute inset-0 pointer-events-none"></div>
+
+          <div class="absolute bottom-2 left-0 right-0 text-center pointer-events-none">
             <span class="bg-gray-950/80 text-cyan-300 text-[10px] px-3 py-1 rounded-full border border-cyan-500/30 backdrop-blur-md">
-              👆 المس واسحب الكرة الأرضية لتدويرها 🌍
+              👆 حرك الكرة لتشاهد كروت الأعضاء فوق أماكنهم 🌍
             </span>
-          </div>
-        </div>
-
-        <!-- كروت الأعضاء -->
-        <div class="grid grid-cols-3 gap-2">
-          <div onclick="openDirectChat('محمد', '⚓')" class="glass-card p-3 rounded-2xl text-center cursor-pointer border-cyan-500/20 hover:border-cyan-400 active:scale-95 transition">
-            <div id="card-avatar-mohamed" class="w-11 h-11 bg-cyan-500/20 text-cyan-400 font-bold rounded-xl flex items-center justify-center mx-auto mb-1.5 border border-cyan-400 text-lg">⚓</div>
-            <h3 id="card-name-mohamed" class="font-bold text-xs text-gray-200">محمد</h3>
-            <p id="card-loc-mohamed" class="text-[9px] text-cyan-400 mt-0.5 font-medium">طرطوس 🌊</p>
-          </div>
-
-          <div onclick="openDirectChat('مصطفى', '🇸🇾')" class="glass-card p-3 rounded-2xl text-center cursor-pointer border-emerald-500/20 hover:border-emerald-400 active:scale-95 transition">
-            <div id="card-avatar-mustafa" class="w-11 h-11 bg-emerald-500/20 text-emerald-400 font-bold rounded-xl flex items-center justify-center mx-auto mb-1.5 border border-emerald-400 text-lg">🇸🇾</div>
-            <h3 id="card-name-mustafa" class="font-bold text-xs text-gray-200">مصطفى</h3>
-            <p class="text-[9px] text-emerald-400 mt-0.5 font-medium">سوريا 📍</p>
-          </div>
-
-          <div onclick="openDirectChat('شهد', '🇸🇪')" class="glass-card p-3 rounded-2xl text-center cursor-pointer border-purple-500/20 hover:border-purple-400 active:scale-95 transition">
-            <div id="card-avatar-shahad" class="w-11 h-11 bg-purple-500/20 text-purple-400 font-bold rounded-xl flex items-center justify-center mx-auto mb-1.5 border border-purple-400 text-lg">🇸🇪</div>
-            <h3 id="card-name-shahad" class="font-bold text-xs text-gray-200">شهد</h3>
-            <p class="text-[9px] text-purple-400 mt-0.5 font-medium">السويد 📍</p>
           </div>
         </div>
       </section>
@@ -129,13 +112,13 @@
         </div>
       </section>
 
-      <!-- TAB 3: سينما الأسبوع والمكتبة الكاملة -->
+      <!-- TAB 3: السينما والمكتبة الـ 100 فيلم -->
       <section id="tab-cinema" class="tab-content hidden space-y-3">
         <div class="glass-card p-4 rounded-2xl text-center space-y-3 border border-amber-500/30">
           <div class="w-12 h-12 bg-amber-500/10 border border-amber-400/30 rounded-2xl flex items-center justify-center mx-auto text-2xl">🎬</div>
           <div>
-            <h3 class="text-base font-bold text-amber-400">مكتبة سينما TriSync</h3>
-            <p class="text-[11px] text-gray-400 mt-0.5">اقتراحات مع تقييمات IMDb المعتمدة عالمياً</p>
+            <h3 class="text-base font-bold text-amber-400">مكتبة سينما TriSync (100 فيلم)</h3>
+            <p class="text-[11px] text-gray-400 mt-0.5">أعظم 100 فيلم عالمي بتقييمات IMDb</p>
           </div>
           
           <div class="flex gap-2">
@@ -143,7 +126,7 @@
               🎲 اقتراح عشوائي
             </button>
             <button onclick="toggleAllMoviesList()" class="bg-gray-800 hover:bg-gray-700 text-amber-300 font-bold text-xs px-3 py-2.5 rounded-xl border border-amber-500/30 active:scale-95 transition">
-              📜 كل الأفلام (20)
+              📜 عرض الـ 100 فيلم
             </button>
           </div>
         </div>
@@ -156,14 +139,14 @@
           <div id="movie-rating" class="text-amber-400 text-xs font-bold"></div>
         </div>
 
-        <!-- قائمة كامل الأفلام -->
+        <!-- قائمة 100 فيلم -->
         <div id="all-movies-container" class="hidden glass-card p-3 rounded-2xl border border-amber-500/20 space-y-2 max-h-96 overflow-y-auto">
-          <h4 class="text-xs font-bold text-amber-400 border-b border-white/10 pb-2 mb-2 text-center">🏆 قائمة أفضل 20 فيلماً مقترحاً</h4>
+          <h4 class="text-xs font-bold text-amber-400 border-b border-white/10 pb-2 mb-2 text-center">🏆 أفضل 100 فيلم عالمي</h4>
           <div id="movies-list-grid" class="space-y-2"></div>
         </div>
       </section>
 
-      <!-- TAB 4: التحديات والكاميرا الحقيقية -->
+      <!-- TAB 4: التحديات -->
       <section id="tab-challenges" class="tab-content hidden space-y-3">
         <div class="glass-card p-4 rounded-2xl border border-emerald-500/30 space-y-3">
           <div class="flex justify-between items-center border-b border-white/5 pb-2">
@@ -176,16 +159,14 @@
 
           <div class="bg-gray-900/60 p-3 rounded-xl border border-white/5 space-y-1">
             <span class="text-[10px] text-emerald-400 font-bold">التحدي الحالي ⚡</span>
-            <p class="text-xs text-gray-200">صوّر البحر أو الغروب أو مكان تواجدك الآن واكسب 50 نقطة!</p>
+            <p class="text-xs text-gray-200">صوّر البحر أو المكان المتواجد فيه واكسب +50 نقطة!</p>
           </div>
 
-          <!-- زر الكاميرا الفعلي مع إمكانية رفع الصور -->
           <input type="file" id="challenge-camera" accept="image/*" capture="environment" class="hidden" onchange="previewChallengePhoto(event)">
           <button onclick="document.getElementById('challenge-camera').click()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 rounded-xl active:scale-95 transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20">
             📸 فتح الكاميرا والتقاط الصورة
           </button>
 
-          <!-- معاينة الصورة الملتقطة -->
           <div id="challenge-preview-box" class="hidden text-center space-y-2 pt-2 border-t border-white/10">
             <img id="challenge-preview-img" class="w-full h-48 object-cover rounded-xl border border-emerald-500/40">
             <p class="text-xs text-emerald-400 font-bold">🎉 تم رفع الصورة بنجاح! تم إضافة +50 نقطة لحسابك.</p>
@@ -195,10 +176,10 @@
 
     </main>
 
-    <!-- ✏️ مودال تعديل البروفايل -->
+    <!-- ✏️ مودال تعديل البروفايل وكلمة السر والصورة -->
     <div id="profile-modal" class="fixed inset-0 bg-gray-950/90 z-50 hidden flex-col justify-center p-4 backdrop-blur-xl">
       <div class="glass-card p-5 rounded-3xl space-y-4 border border-cyan-500/30 max-w-sm mx-auto w-full">
-        <h3 class="font-bold text-center text-cyan-400 text-base">تعديل الملف الشخصي ✏️</h3>
+        <h3 class="font-bold text-center text-cyan-400 text-base">تعديل الملف الشخصي والأمان ✏️</h3>
         
         <div>
           <label class="text-[11px] text-gray-300 mb-1 block">تغيير الاسم:</label>
@@ -206,8 +187,13 @@
         </div>
 
         <div>
-          <label class="text-[11px] text-gray-300 mb-1 block">تغيير الأيقونة / الإيموجي:</label>
-          <input type="text" id="edit-avatar-input" placeholder="مثال: ⚓ أو 👑 أو 🇸🇾" class="w-full bg-gray-900 border border-white/10 rounded-xl p-2.5 text-xs text-center focus:outline-none focus:border-cyan-400">
+          <label class="text-[11px] text-gray-300 mb-1 block">رابط الصورة الشخصية (URL):</label>
+          <input type="url" id="edit-photo-input" placeholder="https://example.com/my-photo.jpg" class="w-full bg-gray-900 border border-white/10 rounded-xl p-2.5 text-xs focus:outline-none focus:border-cyan-400">
+        </div>
+
+        <div>
+          <label class="text-[11px] text-gray-300 mb-1 block">رمز الـ PIN الخاص بك (كلمة المرور):</label>
+          <input type="password" id="edit-pin-input" placeholder="أدخل رمز جديد" class="w-full bg-gray-900 border border-white/10 rounded-xl p-2.5 text-xs focus:outline-none focus:border-cyan-400">
         </div>
 
         <div class="flex gap-2">
@@ -221,7 +207,7 @@
     <div id="direct-chat-modal" class="fixed inset-0 bg-gray-950/95 z-50 hidden flex-col">
       <div class="glass-card p-3.5 m-2 rounded-2xl flex justify-between items-center border border-white/10">
         <div class="flex items-center gap-2.5">
-          <div id="chat-user-icon" class="w-9 h-9 bg-cyan-500/20 text-cyan-400 rounded-xl flex items-center justify-center text-base border border-cyan-400/40"></div>
+          <div id="chat-user-icon" class="w-9 h-9 bg-cyan-500/20 text-cyan-400 rounded-xl flex items-center justify-center text-base border border-cyan-400/40 overflow-hidden"></div>
           <div>
             <h3 id="chat-user-name" class="font-bold text-sm text-gray-100"></h3>
             <p class="text-[9px] text-emerald-400">متصل الآن 🟢</p>
@@ -266,5 +252,5 @@
 
   <script src="app.js"></script>
 </body>
-            </html>
+  </html>
   

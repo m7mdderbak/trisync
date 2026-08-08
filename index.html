@@ -10,22 +10,35 @@
 </head>
 <body class="bg-gray-950 text-white font-sans min-h-screen flex flex-col justify-between select-none">
 
-  <!-- 🔒 شاشة الدخول السرية -->
-  <div id="login-screen" class="fixed inset-0 bg-gray-950/95 z-50 flex items-center justify-center p-4 backdrop-blur-xl">
-    <div class="glass-card w-full max-w-sm p-6 rounded-3xl text-center space-y-5 border border-cyan-500/20 shadow-2xl">
+  <!-- 🔒 شاشة تسجيل الدخول بالبريد/الاسم والرمز -->
+  <div id="login-screen" class="fixed inset-0 bg-gray-950/95 z-50 flex items-center justify-center p-4 backdrop-blur-2xl">
+    <div class="glass-card w-full max-w-sm p-6 rounded-3xl text-center space-y-4 border border-cyan-500/20 shadow-2xl">
       <div class="w-16 h-16 bg-cyan-500/10 border border-cyan-400/30 rounded-2xl flex items-center justify-center mx-auto text-3xl">🌐</div>
       <div>
         <h1 class="text-3xl font-extrabold text-cyan-400 tracking-wider">TriSync</h1>
-        <p class="text-xs text-gray-400 mt-1">مساحة خاصة: محمد ⚓ | مصطفى 🇸🇾 | شهد 🇸🇪</p>
+        <p class="text-xs text-gray-400 mt-1">سجّل دخولك بحسابك الخاص</p>
       </div>
       
-      <div class="space-y-2">
-        <input type="password" id="pin-input" maxlength="4" placeholder="رمز الـ PIN (2006)" class="w-full text-center text-3xl tracking-widest bg-gray-900/90 border border-cyan-500/30 rounded-2xl p-3 focus:outline-none focus:border-cyan-400 text-cyan-300">
-        <p id="pin-error" class="text-red-400 text-xs hidden">الرمز غير صحيح، حاول مجدداً!</p>
+      <div class="space-y-3 text-right">
+        <div>
+          <label class="text-[11px] text-gray-300 mb-1 block">اختر حسابك / البريد:</label>
+          <select id="user-select" class="w-full bg-gray-900 border border-cyan-500/30 rounded-xl p-3 text-xs text-cyan-300 focus:outline-none focus:border-cyan-400">
+            <option value="محمد">محمد (البحار ⚓) - mohamed@trisync.com</option>
+            <option value="مصطفى">مصطفى (سوريا 🇸🇾) - mustafa@trisync.com</option>
+            <option value="شهد">شهد (السويد 🇸🇪) - shahad@trisync.com</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="text-[11px] text-gray-300 mb-1 block">رمز الـ PIN السرّي:</label>
+          <input type="password" id="pin-input" maxlength="4" placeholder="رمز الـ PIN (2006)" class="w-full text-center text-2xl tracking-widest bg-gray-900 border border-cyan-500/30 rounded-xl p-2.5 focus:outline-none focus:border-cyan-400 text-cyan-300">
+        </div>
+        
+        <p id="pin-error" class="text-red-400 text-xs hidden text-center">الرمز غير صحيح، حاول مجدداً!</p>
       </div>
 
-      <button onclick="loginWithPin()" class="w-full bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-bold py-3.5 rounded-2xl transition-all active:scale-95 shadow-lg shadow-cyan-500/25">
-        دخول المنصة 🔐
+      <button onclick="loginWithAccount()" class="w-full bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-bold py-3 rounded-2xl transition-all active:scale-95 shadow-lg shadow-cyan-500/25">
+        دخول الحساب 🔐
       </button>
     </div>
   </div>
@@ -36,17 +49,23 @@
     <!-- الهيدر -->
     <header class="glass-card m-3 p-3.5 rounded-2xl flex justify-between items-center sticky top-3 z-30">
       <div class="flex items-center gap-2.5">
-        <div class="w-9 h-9 bg-cyan-500/20 border border-cyan-400 rounded-xl flex items-center justify-center text-sm">🌐</div>
+        <div id="current-user-avatar" class="w-9 h-9 bg-cyan-500/20 border border-cyan-400 rounded-xl flex items-center justify-center text-base">⚓</div>
         <div>
-          <h2 class="text-sm font-bold text-cyan-400 leading-tight">TriSync</h2>
+          <h2 id="current-user-name" class="text-sm font-bold text-cyan-400 leading-tight">محمد</h2>
           <p class="text-[10px] text-emerald-400 flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> متصلون الآن
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> متصل الآن
           </p>
         </div>
       </div>
-      <button onclick="openSailorModal()" class="bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 text-xs px-3 py-2 rounded-xl border border-indigo-500/30 active:scale-95 transition">
-        ⚓ وضع البحار
-      </button>
+
+      <div class="flex gap-2">
+        <button onclick="openEditProfileModal()" class="bg-gray-800 text-cyan-300 text-xs px-2.5 py-2 rounded-xl border border-white/10 active:scale-95 transition">
+          ✏️ البروفايل
+        </button>
+        <button onclick="openSailorModal()" class="bg-indigo-600/30 text-indigo-300 text-xs px-2.5 py-2 rounded-xl border border-indigo-500/30 active:scale-95 transition">
+          ⚓ وضع البحار
+        </button>
+      </div>
     </header>
 
     <!-- محتوى التبويبات -->
@@ -54,12 +73,14 @@
       
       <!-- TAB 1: الكرة الأرضية والأعضاء -->
       <section id="tab-globe" class="tab-content space-y-4">
-        <!-- كارت الكرة الأرضية -->
-        <div class="glass-card rounded-3xl p-3 overflow-hidden relative border border-cyan-500/20">
-          <div id="globe-container" class="w-full h-64"></div>
+        <!-- كارت الكرة الأرضية الواقعية -->
+        <div class="glass-card rounded-3xl p-2 overflow-hidden relative border border-cyan-500/20">
+          <div id="globe-container" class="w-full h-72 rounded-2xl overflow-hidden relative"></div>
+          
+          <!-- التسميات والمجسمات المراكبية فوق الكرة -->
           <div class="absolute bottom-3 left-0 right-0 text-center pointer-events-none">
-            <span class="bg-gray-900/80 text-cyan-300 text-[10px] px-3 py-1 rounded-full border border-cyan-500/30">
-              اسحب الكرة الأرضية للتفاعل 🌍
+            <span class="bg-gray-950/80 text-cyan-300 text-[10px] px-3 py-1 rounded-full border border-cyan-500/30 backdrop-blur-md">
+              حرك الكرة الأرضية لرؤية مواقعكم والدبابيس 📍
             </span>
           </div>
         </div>
@@ -68,28 +89,28 @@
         <div class="grid grid-cols-3 gap-2">
           <!-- محمد -->
           <div onclick="openDirectChat('محمد', '⚓')" class="glass-card p-3 rounded-2xl text-center cursor-pointer border-cyan-500/20 hover:border-cyan-400 active:scale-95 transition">
-            <div class="w-11 h-11 bg-cyan-500/20 text-cyan-400 font-bold rounded-xl flex items-center justify-center mx-auto mb-1.5 border border-cyan-400 text-lg">⚓</div>
+            <div id="card-avatar-mohamed" class="w-11 h-11 bg-cyan-500/20 text-cyan-400 font-bold rounded-xl flex items-center justify-center mx-auto mb-1.5 border border-cyan-400 text-lg">⚓</div>
             <h3 id="card-name-mohamed" class="font-bold text-xs text-gray-200">محمد</h3>
             <p id="card-loc-mohamed" class="text-[9px] text-cyan-400 mt-0.5 font-medium">البحر 🌊</p>
           </div>
 
           <!-- مصطفى -->
           <div onclick="openDirectChat('مصطفى', '🇸🇾')" class="glass-card p-3 rounded-2xl text-center cursor-pointer border-emerald-500/20 hover:border-emerald-400 active:scale-95 transition">
-            <div class="w-11 h-11 bg-emerald-500/20 text-emerald-400 font-bold rounded-xl flex items-center justify-center mx-auto mb-1.5 border border-emerald-400 text-lg">🇸🇾</div>
+            <div id="card-avatar-mustafa" class="w-11 h-11 bg-emerald-500/20 text-emerald-400 font-bold rounded-xl flex items-center justify-center mx-auto mb-1.5 border border-emerald-400 text-lg">🇸🇾</div>
             <h3 id="card-name-mustafa" class="font-bold text-xs text-gray-200">مصطفى</h3>
-            <p class="text-[9px] text-emerald-400 mt-0.5 font-medium">سوريا</p>
+            <p class="text-[9px] text-emerald-400 mt-0.5 font-medium">سوريا 📍</p>
           </div>
 
           <!-- شهد -->
           <div onclick="openDirectChat('شهد', '🇸🇪')" class="glass-card p-3 rounded-2xl text-center cursor-pointer border-purple-500/20 hover:border-purple-400 active:scale-95 transition">
-            <div class="w-11 h-11 bg-purple-500/20 text-purple-400 font-bold rounded-xl flex items-center justify-center mx-auto mb-1.5 border border-purple-400 text-lg">🇸🇪</div>
+            <div id="card-avatar-shahad" class="w-11 h-11 bg-purple-500/20 text-purple-400 font-bold rounded-xl flex items-center justify-center mx-auto mb-1.5 border border-purple-400 text-lg">🇸🇪</div>
             <h3 id="card-name-shahad" class="font-bold text-xs text-gray-200">شهد</h3>
-            <p class="text-[9px] text-purple-400 mt-0.5 font-medium">السويد</p>
+            <p class="text-[9px] text-purple-400 mt-0.5 font-medium">السويد 📍</p>
           </div>
         </div>
       </section>
 
-      <!-- TAB 2: الغرفة السرية (Shadow Room) -->
+      <!-- TAB 2: الغرفة السرية -->
       <section id="tab-shadow" class="tab-content hidden space-y-3">
         <div class="glass-card p-4 rounded-2xl border border-purple-500/30 flex justify-between items-center">
           <div>
@@ -101,13 +122,13 @@
 
         <div id="shadow-chat-box" class="glass-card p-3 rounded-2xl h-80 overflow-y-auto space-y-2 text-xs border border-purple-500/20">
           <div class="bg-purple-950/40 border border-purple-500/20 p-2.5 rounded-xl text-purple-200">
-            <span class="font-bold text-purple-400">👤 عضو مجهول:</span> مرحباً بكم في الغرفة السرية! هنا لا أحد يعرف من أرسل الرسالة.
+            <span class="font-bold text-purple-400">👤 عضو مجهول:</span> مرحباً بك في الغرفة السرية!
           </div>
         </div>
 
         <div class="flex gap-2">
-          <input type="text" id="shadow-input" placeholder="اكتب رسالة مجهولة..." class="flex-1 bg-gray-900/90 border border-purple-500/30 rounded-xl px-3 text-xs focus:outline-none focus:border-purple-400">
-          <button onclick="sendShadowMessage()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-3 rounded-xl text-xs font-bold active:scale-95 transition">إرسال 🎭</button>
+          <input type="text" id="shadow-input" placeholder="اكتب رسالة مجهولة..." class="flex-1 bg-gray-900 border border-purple-500/30 rounded-xl px-3 text-xs focus:outline-none focus:border-purple-400">
+          <button onclick="sendShadowMessage()" class="bg-purple-600 text-white px-4 py-3 rounded-xl text-xs font-bold active:scale-95 transition">إرسال 🎭</button>
         </div>
       </section>
 
@@ -132,7 +153,7 @@
         </div>
       </section>
 
-      <!-- TAB 4: التحديات والنقاط -->
+      <!-- TAB 4: التحديات -->
       <section id="tab-challenges" class="tab-content hidden space-y-3">
         <div class="glass-card p-4 rounded-2xl border border-emerald-500/30 space-y-3">
           <div class="flex justify-between items-center border-b border-white/5 pb-2">
@@ -148,7 +169,7 @@
             <p class="text-xs text-gray-200">صوّر الغروب أو البحر من مكانك الآن واكتب تعليقاً سريعاً!</p>
           </div>
 
-          <button onclick="alert('جارٍ فتح كاميرا الهاتف لتصوير التحدي...')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2.5 rounded-xl active:scale-95 transition">
+          <button onclick="alert('جارٍ فتح كاميرا الهاتف لتصوير التحدي...')" class="w-full bg-emerald-600 text-white font-bold text-xs py-2.5 rounded-xl active:scale-95 transition">
             📸 إرسال الصورة وإضافة النقاط
           </button>
         </div>
@@ -156,30 +177,49 @@
 
     </main>
 
-    <!-- 💬 نافذة الشات المباشر مع أي شخص -->
+    <!-- ✏️ مودال تعديل البروفايل -->
+    <div id="profile-modal" class="fixed inset-0 bg-gray-950/90 z-50 hidden flex-col justify-center p-4 backdrop-blur-xl">
+      <div class="glass-card p-5 rounded-3xl space-y-4 border border-cyan-500/30 max-w-sm mx-auto w-full">
+        <h3 class="font-bold text-center text-cyan-400 text-base">تعديل الملف الشخصي ✏️</h3>
+        
+        <div>
+          <label class="text-[11px] text-gray-300 mb-1 block">تغيير الاسم:</label>
+          <input type="text" id="edit-name-input" class="w-full bg-gray-900 border border-white/10 rounded-xl p-2.5 text-xs focus:outline-none focus:border-cyan-400">
+        </div>
+
+        <div>
+          <label class="text-[11px] text-gray-300 mb-1 block">تغيير الأيقونة / الإيموجي:</label>
+          <input type="text" id="edit-avatar-input" placeholder="مثال: ⚓ أو 👑 أو 🇸🇾" class="w-full bg-gray-900 border border-white/10 rounded-xl p-2.5 text-xs text-center focus:outline-none focus:border-cyan-400">
+        </div>
+
+        <div class="flex gap-2">
+          <button onclick="saveProfileChanges()" class="flex-1 bg-cyan-500 text-gray-950 font-bold py-2.5 rounded-xl text-xs">حفظ التغييرات</button>
+          <button onclick="closeEditProfileModal()" class="bg-gray-800 text-gray-300 px-4 py-2.5 rounded-xl text-xs">إلغاء</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 💬 نافذة الشات المباشر -->
     <div id="direct-chat-modal" class="fixed inset-0 bg-gray-950/95 z-50 hidden flex-col">
-      <!-- هيدر الشات -->
       <div class="glass-card p-3.5 m-2 rounded-2xl flex justify-between items-center border border-white/10">
         <div class="flex items-center gap-2.5">
           <div id="chat-user-icon" class="w-9 h-9 bg-cyan-500/20 text-cyan-400 rounded-xl flex items-center justify-center text-base border border-cyan-400/40"></div>
           <div>
             <h3 id="chat-user-name" class="font-bold text-sm text-gray-100"></h3>
-            <p id="chat-user-status" class="text-[9px] text-emerald-400">متصل الآن 🟢</p>
+            <p class="text-[9px] text-emerald-400">متصل الآن 🟢</p>
           </div>
         </div>
-        <button onclick="closeDirectChat()" class="text-gray-400 hover:text-white bg-gray-900/80 w-8 h-8 rounded-xl flex items-center justify-center text-sm border border-white/10">✕</button>
+        <button onclick="closeDirectChat()" class="text-gray-400 bg-gray-900 w-8 h-8 rounded-xl flex items-center justify-center text-sm border border-white/10">✕</button>
       </div>
 
-      <!-- صندوق الرسائل -->
       <div id="direct-chat-messages" class="flex-1 p-3 overflow-y-auto space-y-2.5 text-xs">
         <div class="bg-gray-900/80 border border-white/10 p-2.5 rounded-2xl max-w-[80%] self-start text-gray-300">
           أهلاً بك! هذا شات خاص ومباشر بيننا 💬
         </div>
       </div>
 
-      <!-- إدخال الرسالة -->
       <div class="p-2 glass-card m-2 rounded-2xl border border-white/10 flex gap-2">
-        <input type="text" id="direct-chat-input" placeholder="اكتب رسالتك..." class="flex-1 bg-gray-900/90 border border-white/10 rounded-xl px-3 text-xs focus:outline-none focus:border-cyan-400">
+        <input type="text" id="direct-chat-input" placeholder="اكتب رسالتك..." class="flex-1 bg-gray-900 border border-white/10 rounded-xl px-3 text-xs focus:outline-none focus:border-cyan-400">
         <button onclick="sendDirectMessage()" class="bg-cyan-500 text-gray-950 font-bold px-4 py-2.5 rounded-xl text-xs active:scale-95 transition">إرسال 🚀</button>
       </div>
     </div>
@@ -190,15 +230,15 @@
         <span class="text-xl mb-0.5">🌐</span>
         <span class="font-bold">الكرة</span>
       </button>
-      <button onclick="switchTab('shadow')" class="nav-btn flex flex-col items-center text-gray-400 hover:text-purple-400 text-[10px]">
+      <button onclick="switchTab('shadow')" class="nav-btn flex flex-col items-center text-gray-400 text-[10px]">
         <span class="text-xl mb-0.5">👻</span>
         <span>السرية</span>
       </button>
-      <button onclick="switchTab('cinema')" class="nav-btn flex flex-col items-center text-gray-400 hover:text-amber-400 text-[10px]">
+      <button onclick="switchTab('cinema')" class="nav-btn flex flex-col items-center text-gray-400 text-[10px]">
         <span class="text-xl mb-0.5">🎬</span>
         <span>السينما</span>
       </button>
-      <button onclick="switchTab('challenges')" class="nav-btn flex flex-col items-center text-gray-400 hover:text-emerald-400 text-[10px]">
+      <button onclick="switchTab('challenges')" class="nav-btn flex flex-col items-center text-gray-400 text-[10px]">
         <span class="text-xl mb-0.5">🏆</span>
         <span>التحديات</span>
       </button>
@@ -208,4 +248,5 @@
 
   <script src="app.js"></script>
 </body>
-</html>
+        </html>
+                                       
